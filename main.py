@@ -8,14 +8,15 @@ def run():
 
     while True:
         print_menu()
-        print("blockchain:", blockchain.get_all())
-        print("current_block:", blockchain.current_block)
+        print_blockchain(blockchain)
 
-        op = get_op('enter: ', int)
+        try:
+            op = get_op('enter: ', int)
+        except not KeyboardInterrupt:
+            continue
 
         if op == 1:
-            print("blockchain:", blockchain.get_all())
-            print("current_block:", blockchain.current_block)
+            print_blockchain(blockchain)
         elif op == 2:
             s = get_op('sender: ')
             r = get_op('receiver: ')
@@ -40,6 +41,11 @@ def print_menu():
 4) validate blockchain
 9) exit
     ''')
+
+
+def print_blockchain(blockchain):
+    print("blockchain:", blockchain.get_all())
+    print("current_block:", blockchain.current_block)
 
 
 def get_op(message, _type=None) -> Any:

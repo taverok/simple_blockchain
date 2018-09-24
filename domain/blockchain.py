@@ -9,7 +9,16 @@ class Blockchain():
     def get_all(self):
         return self.__blockchain[:]
 
+    def validate_transaction(self, sender: str, amount: float) -> bool:
+        if amount > self.get_user_balance(sender):
+            return False
+
+        return True
+
     def make_transaction(self, sender: str, recipient: str, amount: float) -> None:
+        if not self.validate_transaction(sender, amount):
+            raise Exception('sender balance too low')
+
         self.current_block.add_transaction(Transaction(sender, recipient, amount))
 
     def get_last_block(self) -> Block:
@@ -19,7 +28,7 @@ class Blockchain():
         last_block = self.get_last_block()
 
         self.current_block.hash = last_block.calculate_hash() if last_block else ''
-        self.current_block.index = last_block.index+1 if last_block else 0
+        self.current_block.index = last_block.index + 1
 
         self.current_block.validate(last_block)
 
@@ -32,10 +41,18 @@ class Blockchain():
         for block in self.__blockchain:
             if not block.is_genesis() and prev_block.calculate_hash() != block.hash:
                 return False
-
             prev_block = block
 
         return True
+
+    def get_user_balance(self, user):
+        balance = 0
+        for block in self.__blockchain:
+            for trans in block.transactions:
+                mult = 1 if trans.recipient == user else -1
+                balance += mult * trans.amount
+
+        return balance
 
     def __repr__(self):
         return str(vars(self))
