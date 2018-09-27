@@ -16,8 +16,8 @@ class Blockchain():
         return True
 
     def make_transaction(self, sender: str, recipient: str, amount: float) -> None:
-        if not self.validate_transaction(sender, amount):
-            raise Exception('sender balance too low')
+        # if not self.validate_transaction(sender, amount):
+        #     raise Exception('sender balance too low')
 
         self.current_block.add_transaction(Transaction(sender, recipient, amount))
 
@@ -27,8 +27,17 @@ class Blockchain():
     def mine_block(self):
         last_block = self.get_last_block()
 
-        self.current_block.hash = last_block.calculate_hash() if last_block else ''
+        self.current_block.prev_hash = last_block.calculate_hash() if last_block else ''
         self.current_block.index = last_block.index + 1
+
+        proof = self.search_pow(self.current_block)
+
+        self.current_block.pow = proof
+
+        # TODO: add miner revenue
+        # miner_amount = amount * 0.05
+        # amount -= miner_amount
+        # self.current_block.add_transaction(Transaction(sender, miner, miner_amount))
 
         self.current_block.validate(last_block)
 
@@ -39,7 +48,7 @@ class Blockchain():
         prev_block = Block.get_genesis_block()
 
         for block in self.__blockchain:
-            if not block.is_genesis() and prev_block.calculate_hash() != block.hash:
+            if not block.is_genesis() and prev_block.calculate_hash() != block.prev_hash:
                 return False
             prev_block = block
 
@@ -53,6 +62,14 @@ class Blockchain():
                 balance += mult * trans.amount
 
         return balance
+
+    def search_pow(self, block: Block) -> int:
+        p = 0
+
+        while True:
+            if block.validate_pow(p):
+                return p
+            p += 1
 
     def __repr__(self):
         return str(vars(self))
