@@ -1,10 +1,15 @@
+import pickle
+
 from domain.block import Block, Transaction
 
 
 class Blockchain():
     def __init__(self):
-        self.__blockchain = [Block.get_genesis_block()]
-        self.current_block = Block()
+        try:
+            self.load()
+        except:
+            self.__blockchain = [Block.get_genesis_block()]
+            self.current_block = Block()
 
     def get_all(self):
         return self.__blockchain[:]
@@ -20,6 +25,7 @@ class Blockchain():
         #     raise Exception('sender balance too low')
 
         self.current_block.add_transaction(Transaction(sender, recipient, amount))
+        self.save()
 
     def get_last_block(self) -> Block:
         return self.__blockchain[-1]
@@ -29,10 +35,7 @@ class Blockchain():
 
         self.current_block.prev_hash = last_block.calculate_hash() if last_block else ''
         self.current_block.index = last_block.index + 1
-
-        proof = self.search_pow(self.current_block)
-
-        self.current_block.pow = proof
+        self.current_block.pow = self.search_pow(self.current_block)
 
         # TODO: add miner revenue
         # miner_amount = amount * 0.05
@@ -43,6 +46,7 @@ class Blockchain():
 
         self.__blockchain.append(self.current_block)
         self.current_block = Block()
+        self.save()
 
     def validate(self):
         prev_block = Block.get_genesis_block()
@@ -70,6 +74,20 @@ class Blockchain():
             if block.validate_pow(p):
                 return p
             p += 1
+
+    def load(self):
+        with open('__dump.json', 'rb') as f:
+            data = pickle.loads(f.read())
+            self.__blockchain = data.get('blockchain')
+            self.current_block = data.get('current_block')
+
+    def save(self):
+        data = {
+            'blockchain': self.__blockchain,
+            'current_block': self.current_block,
+        }
+        with open('__dump.json', 'wb') as f:
+            f.write(pickle.dumps(data))
 
     def __repr__(self):
         return str(vars(self))

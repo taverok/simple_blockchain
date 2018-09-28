@@ -10,10 +10,7 @@ def run():
         print_menu()
         print_blockchain(blockchain)
 
-        try:
-            op = get_op('enter: ', int)
-        except not KeyboardInterrupt:
-            continue
+        op = get_op('enter: ', int)
 
         if op == 1:
             print_blockchain(blockchain)
