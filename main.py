@@ -1,6 +1,7 @@
 from typing import Any
 
 from domain.blockchain import Blockchain
+from domain.exception import TransactionException
 
 
 def run():
@@ -18,7 +19,10 @@ def run():
             s = get_op('sender: ')
             r = get_op('receiver: ')
             a = get_op('amount: ', float)
-            blockchain.make_transaction(s, r, a)
+            try:
+                blockchain.make_transaction(s, r, a)
+            except TransactionException:
+                continue
         elif op == 3:
             blockchain.mine_block()
         elif op == 4:

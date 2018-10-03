@@ -21,8 +21,16 @@ class Blockchain():
         return True
 
     def make_transaction(self, sender: str, recipient: str, amount: float) -> None:
+        """
+        Adds transaction to the current block
+        :param sender:
+        :param recipient:
+        :param amount:
+        :return:
+        :except: TransactionException
+        """
         # if not self.validate_transaction(sender, amount):
-        #     raise Exception('sender balance too low')
+        #     raise TransactionException('sender balance too low')
 
         self.current_block.add_transaction(Transaction(sender, recipient, amount))
         self.save()
@@ -76,7 +84,7 @@ class Blockchain():
             p += 1
 
     def load(self):
-        with open('__dump.json', 'rb') as f:
+        with open('__dump.bin', 'rb') as f:
             data = pickle.loads(f.read())
             self.__blockchain = data.get('blockchain')
             self.current_block = data.get('current_block')
@@ -86,7 +94,7 @@ class Blockchain():
             'blockchain': self.__blockchain,
             'current_block': self.current_block,
         }
-        with open('__dump.json', 'wb') as f:
+        with open('__dump.bin', 'wb') as f:
             f.write(pickle.dumps(data))
 
     def __repr__(self):
